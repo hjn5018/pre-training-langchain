@@ -9,20 +9,51 @@ from langchain_openai import OpenAI
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-# LLM 초기화
+# LangChain LLM 초기화
 llm = OpenAI()
 
-# Streamlit 앱 제목
-st.title("관광지 추천 LLM")
+# 페이지 설정
+st.set_page_config(
+    page_title="한국 관광지 추천",
+    page_icon="🌐",
+    layout="centered",
+    initial_sidebar_state="expanded"
+)
 
-# 설명 텍스트
-st.write("아래 버튼을 클릭하면 한국의 대표적인 관광지 3곳을 추천받을 수 있어요.")
+# --- 사이드바 ---
+with st.sidebar:
+    st.markdown("## 설정")
+    st.markdown("관광지 추천 옵션을 선택하세요.")
+    
+    num_places = st.selectbox("추천 받을 관광지 수", [3, 5], index=0)
+    user_prompt = st.text_area(
+        "질문 내용",
+        f"한국의 대표적인 관광지 {num_places}군데를 추천해주세요.",
+        height=100
+    )
+    recommend_btn = st.button("관광지 추천받기")
 
-# 버튼 누르면 결과 출력
-if st.button("관광지 추천받기"):
-    question = "한국의 대표적인 관광지 3군데를 추천해주세요."
-    with st.spinner("추천 중입니다..."):
-        result = llm.invoke(question)
-    st.success("추천 완료!")
-    st.text_area("추천 결과", result, height=200)
+# --- 메인 화면 ---
+st.title("🇰🇷 한국 관광지 추천 시스템")
+st.markdown(
+    """
+    여행을 준비 중이신가요?  
+    이 앱은 OpenAI의 LLM을 기반으로, 한국에서 꼭 가봐야 할 관광지를 추천해드립니다.
+    """
+)
+st.markdown("---")
 
+# 결과 처리
+if recommend_btn:
+    with st.spinner("추천 중입니다. 잠시만 기다려주세요..."):
+        try:
+            response = llm.invoke(user_prompt)
+            st.success("추천이 완료되었습니다!")
+            st.markdown("### 📝 추천 결과")
+            st.text_area("관광지 리스트", response, height=250)
+        except Exception as e:
+            st.error(f"오류가 발생했습니다: {e}")
+
+# 푸터
+st.markdown("---")
+st.caption("© 2025 Korea Travel AI | Powered by LangChain & OpenAI")
