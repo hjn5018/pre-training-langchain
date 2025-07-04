@@ -5,3 +5,4 @@ build/
 *.spec
 *.exe
 *.xlsx
+.ipynb_checkpoints
